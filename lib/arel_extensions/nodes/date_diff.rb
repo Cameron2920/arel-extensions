@@ -5,10 +5,12 @@ module ArelExtensions
     class DateDiff < Function #difference entre colonne date et date string/date
       attr_accessor :left_node_type
       attr_accessor :right_node_type
+      attr_accessor :precision
 
       RETURN_TYPE = :integer # by default...
 
-      def initialize(expr)
+      def initialize(expr, precision = 'second')
+        self.precision = precision
         res = []
         col = expr.first
         case col
