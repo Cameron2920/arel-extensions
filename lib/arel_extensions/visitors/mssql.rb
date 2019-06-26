@@ -100,6 +100,29 @@ module ArelExtensions
         collector
       end
 
+      def visit_ArelExtensions_Nodes_StringToDate(o, collector)
+        collector << "CAST("
+        collector = visit Arel::Nodes::Quoted.new(o.left), collector
+        collector << " AS datetime)"
+        collector
+      end
+
+      def visit_ArelExtensions_Nodes_DateTruncate(o, collector)
+        date_unit = Arel::Nodes::SqlLiteral.new(o.left)
+        collector << "DATEADD("
+        collector = visit date_unit, collector
+        collector << Arel::Visitors::MSSQL::COMMA
+        collector << " DATEDIFF("
+        collector = visit date_unit, collector
+        collector << Arel::Visitors::MSSQL::COMMA
+        collector << " 0"
+        collector << Arel::Visitors::MSSQL::COMMA
+        collector = visit o.right, collector
+        collector << ")"
+        collector << Arel::Visitors::MSSQL::COMMA
+        collector << " 0)"
+        collector
+      end
 
       def visit_ArelExtensions_Nodes_DateDiff o, collector
         collector << if o.left_node_type == :ruby_time || o.left_node_type == :datetime || o.left_node_type == :time

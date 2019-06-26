@@ -14,7 +14,7 @@ module ArelExtensions
         res = []
         col = expr.first
         case col
-        when Arel::Nodes::Node, Arel::Attributes::Attribute 
+        when Arel::Nodes::Node, Arel::Attributes::Attribute
           @left_node_type = type_of_attribute(col)
         when Date
           @left_node_type = :ruby_date
@@ -23,7 +23,7 @@ module ArelExtensions
         end
         res << ([:date, :ruby_date].include?(@left_node_type) ? convert_to_date_node(col) : convert_to_datetime_node(col))
         case expr[1]
-        when Arel::Nodes::Node, Arel::Attributes::Attribute 
+        when Arel::Nodes::Node, Arel::Attributes::Attribute
           @right_node_type = type_of_attribute(expr[1])
         when Date
           @right_node_type = :ruby_date
@@ -35,13 +35,39 @@ module ArelExtensions
       end
     end
 
+    class DateTruncate < Function
+      attr_accessor :left_node_type
+      attr_accessor :right_node_type
+      attr_accessor :precision
+
+      RETURN_TYPE = :datetime
+
+      def initialize(expr)
+        super expr
+      end
+    end
+
+    class StringToDate < Function
+      RETURN_TYPE = :datetime
+
+      def initialize(expr)
+        super expr
+      end
+    end
+
     class DateAdd < Function
       RETURN_TYPE = :date
       attr_accessor :date_type
 
       def initialize expr
         col = expr.first
-        @date_type = type_of_attribute(col)
+
+        case col
+        when Arel::Nodes::Quoted, Arel::Nodes::SqlLiteral
+          @date_type = :datetime
+        else
+          @date_type = type_of_attribute(col)
+        end
         tab = expr.map do |arg|
           convert(arg)
         end
