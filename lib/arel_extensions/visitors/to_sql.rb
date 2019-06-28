@@ -489,8 +489,11 @@ module ArelExtensions
 			collector << "ELSE "
 			visit o.expr, collector
 		end
-		
-		
+
+      def visit_ArelExtensions_Nodes_CurrentDate(o, collector)
+        collector << "NOW()"
+        collector
+      end
 		
 		def visit_ArelExtensions_Nodes_FormattedNumber o, collector		
 			col = o.left

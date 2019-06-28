@@ -493,15 +493,6 @@ module ArelExtensions
 		collector
 	end
 
-	
-	alias_method :old_visit_Arel_Nodes_SelectStatement, :visit_Arel_Nodes_SelectStatement
-	def visit_Arel_Nodes_SelectStatement o, collector	
-		if !collector.value.blank? && o.limit.blank? && o.offset.blank? 					
-			o = o.dup
-			o.orders = []
-		end
-		old_visit_Arel_Nodes_SelectStatement(o,collector)
-	end	
 
 
     end

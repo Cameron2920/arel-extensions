@@ -230,10 +230,10 @@ module ArelExtensions
         else
           date_format = '%Y-%m-%d %H:%I:%S'
         end
-        collector << "DATEFORMATE("
+        collector << "DATE_FORMAT("
         collector = visit o.right, collector
         collector << Arel::Visitors::ToSql::COMMA
-        collector << date_format
+        collector = visit Arel::Nodes::Quoted.new(date_format), collector
         collector << ")"
         collector
       end
@@ -315,16 +315,6 @@ module ArelExtensions
         collector << ")"
         collector
       end
-
-      alias_method :old_visit_Arel_Nodes_SelectStatement, :visit_Arel_Nodes_SelectStatement
-      def visit_Arel_Nodes_SelectStatement o, collector
-        if !collector.value.blank? && o.limit.blank? && o.offset.blank?
-          o = o.dup
-          o.orders = []
-        end
-        old_visit_Arel_Nodes_SelectStatement(o,collector)
-      end
-
     end
   end
 end

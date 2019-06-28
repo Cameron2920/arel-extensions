@@ -47,6 +47,14 @@ module ArelExtensions
       end
     end
 
+    class CurrentDate < Function
+      RETURN_TYPE = :datetime
+
+      def initialize(expr)
+        super expr
+      end
+    end
+
     class StringToDate < Function
       RETURN_TYPE = :datetime
 
