@@ -67,15 +67,20 @@ module ArelExtensions
       RETURN_TYPE = :date
       attr_accessor :date_type
 
-      def initialize expr
+      def initialize expr, date_type
         col = expr.first
 
-        case col
-        when Arel::Nodes::Quoted, Arel::Nodes::SqlLiteral
-          @date_type = :datetime
+        if date_type
+          @date_type = date_type.try(:to_sym)
         else
-          @date_type = type_of_attribute(col)
+          case col
+          when Arel::Nodes::Quoted, Arel::Nodes::SqlLiteral
+            @date_type = :datetime
+          else
+            @date_type = type_of_attribute(col)
+          end
         end
+
         tab = expr.map do |arg|
           convert(arg)
         end

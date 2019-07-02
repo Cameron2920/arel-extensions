@@ -8,6 +8,8 @@ module ArelExtensions
 			def initialize expr 
 				@as_attr = expr[1]
 				case expr[1]
+				when 'boolean'
+					@return_type= :boolean
 				when 'bigint', 'int', 'smallint', 'tinyint', 'bit'
 					@return_type= :int
 				when 'decimal', 'numeric', 'money', 'smallmoney', 'float', 'real'

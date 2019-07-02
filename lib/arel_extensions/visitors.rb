@@ -3,6 +3,7 @@ require 'arel_extensions/visitors/mysql'
 require 'arel_extensions/visitors/oracle'
 require 'arel_extensions/visitors/postgresql'
 require 'arel_extensions/visitors/sqlite'
+require 'arel_extensions/visitors/sqlserver'
 require 'arel_extensions/visitors/mssql'
 
 Arel::Visitors::MSSQL.class_eval do
