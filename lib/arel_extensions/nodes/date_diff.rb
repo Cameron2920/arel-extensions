@@ -11,27 +11,7 @@ module ArelExtensions
 
       def initialize(expr, precision = 'second')
         self.precision = precision
-        res = []
-        col = expr.first
-        case col
-        when Arel::Nodes::Node, Arel::Attributes::Attribute
-          @left_node_type = type_of_attribute(col)
-        when Date
-          @left_node_type = :ruby_date
-        when DateTime, Time
-          @left_node_type = :ruby_time
-        end
-        res << ([:date, :ruby_date].include?(@left_node_type) ? convert_to_date_node(col) : convert_to_datetime_node(col))
-        case expr[1]
-        when Arel::Nodes::Node, Arel::Attributes::Attribute
-          @right_node_type = type_of_attribute(expr[1])
-        when Date
-          @right_node_type = :ruby_date
-        when DateTime, Time
-          @right_node_type = :ruby_time
-        end
-        res << ([:date, :ruby_date].include?(@left_node_type) ? convert_to_date_node(expr[1]) : convert_to_datetime_node(expr[1]))
-        super res
+        super expr
       end
     end
 

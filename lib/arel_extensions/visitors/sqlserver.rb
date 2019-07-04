@@ -26,17 +26,63 @@ module ArelExtensions
       end
 
       def visit_ArelExtensions_Nodes_DateDiff o, collector
-        collector << if o.left_node_type == :ruby_time || o.left_node_type == :datetime || o.left_node_type == :time
-                       "DATEDIFF(#{o.precision}"
-                     else
-                       'DATEDIFF(day'
-                     end
+        if o.precision == 'year' || o.precision == 'month'
+          month_year_date_diff(o, collector)
+        else
+          default_date_diff(o, collector)
+        end
+      end
+
+      def month_year_date_diff(o, collector)
+        collector << "DATEDIFF(#{o.precision}"
         collector << Arel::Visitors::MSSQL::COMMA
         collector = visit o.right, collector
         collector << Arel::Visitors::MSSQL::COMMA
         collector = visit o.left, collector
         collector << ')'
+        collector << ' + '
+        collector << "(DATEDIFF(millisecond, DATEADD(#{o.precision}, DATEDIFF(#{o.precision}, 0, "
+        collector = visit o.left, collector
+        collector << "), 0), "
+        collector = visit o.left, collector
+        collector << ")"
+        collector << " - "
+        collector << "DATEDIFF(millisecond, DATEADD(#{o.precision}, DATEDIFF(#{o.precision}, 0, "
+        collector = visit o.right, collector
+        collector << "), 0), "
+        collector = visit o.right, collector
+        collector << ")"
+        collector << ") / CAST(#{second_unit_multiplier(o.precision)} AS float)"
         collector
+      end
+
+      def default_date_diff(o, collector)
+        collector << "DATEDIFF(second"
+        collector << Arel::Visitors::MSSQL::COMMA
+        collector = visit o.right, collector
+        collector << Arel::Visitors::MSSQL::COMMA
+        collector = visit o.left, collector
+        collector << ") / CAST(#{second_unit_multiplier(o.precision)} AS float)"
+        collector
+      end
+
+      def second_unit_multiplier(unit)
+        case unit
+        when 'year'
+          366 * 24 * 60 * 60
+        when 'month'
+          31 * 24 * 60 * 60
+        when 'week'
+          7 * 24 * 60 * 60
+        when 'day'
+          24 * 60 * 60
+        when 'hour'
+          60 * 60
+        when 'minute'
+          60
+        when 'second'
+          1
+        end
       end
 
       def visit_ArelExtensions_Nodes_DateAdd o, collector
@@ -47,6 +93,11 @@ module ArelExtensions
         collector << Arel::Visitors::MSSQL::COMMA
         collector = visit o.left, collector
         collector << ")"
+        collector
+      end
+
+      def visit_ArelExtensions_Nodes_CurrentDate(o, collector)
+        collector << "GETDATE()"
         collector
       end
 

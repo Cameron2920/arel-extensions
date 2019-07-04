@@ -239,11 +239,7 @@ module ArelExtensions
       end
 
       def visit_ArelExtensions_Nodes_DateDiff o, collector
-        collector << if o.left_node_type == :ruby_time || o.left_node_type == :datetime || o.left_node_type == :time
-                       'TIMESTAMPDIFF(SECOND, '
-                     else
-                       'DATEDIFF('
-                     end
+        collector << 'DATEDIFF('
         collector = visit o.right, collector
         collector << Arel::Visitors::MySQL::COMMA
         collector = visit o.left, collector
