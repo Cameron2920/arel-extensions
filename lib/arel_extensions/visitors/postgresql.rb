@@ -212,6 +212,108 @@ module ArelExtensions
         collector
       end
 
+      def visit_ArelExtensions_Nodes_DateDiff o, collector
+        if o.precision == 'year'
+          year_date_diff(o, collector)
+        elsif o.precision == 'month'
+          month_date_diff(o, collector)
+        else
+          default_date_diff(o, collector)
+        end
+      end
+
+      def month_date_diff(o, collector)
+        collector << "12 * (DATE_PART('year', age("
+        collector = visit o.right, collector
+        collector << ", "
+        collector = visit o.left, collector
+        collector << ")))"
+        collector << " + "
+        collector << "(DATE_PART('month', age("
+        collector = visit o.right, collector
+        collector << ", "
+        collector = visit o.left, collector
+        collector << ")))"
+        collector << " + "
+        collector << " ( "
+        collector << "extract("
+        collector << "epoch from ("
+        collector = visit o.left, collector
+        collector << " - "
+        collector << " ( "
+        collector = visit o.right, collector
+        collector << " + "
+        collector << " ( "
+        collector << "interval '1 month' * ("
+        collector << "12 * (DATE_PART('year', age("
+        collector = visit o.right, collector
+        collector << ", "
+        collector = visit o.left, collector
+        collector << ")))"
+        collector << " + "
+        collector << "(DATE_PART('month', age("
+        collector = visit o.right, collector
+        collector << ", "
+        collector = visit o.left, collector
+        collector << ")))"
+        collector << " ) "
+        collector << " ) "
+        collector << " ) "
+        collector << " ) "
+        collector << " ) "
+        collector << " ) "
+        collector
+      end
+
+      def year_date_diff(o, collector)
+        collector << "DATE_PART('year',"
+        collector = visit o.left, collector
+        collector << ") - DATE_PART('year',"
+        collector = visit o.right, collector
+        collector << ")"
+        collector << " + extract(epoch from ("
+        collector = visit o.left, collector
+        collector << " - ("
+        collector = visit o.right, collector
+        collector << " + "
+        collector << "interval '1 year' * (DATE_PART('year',"
+        collector = visit o.left, collector
+        collector << ") - DATE_PART('year',"
+        collector = visit o.right, collector
+        collector << ")"
+        collector << ")"
+        collector << "))) / CAST(#{second_unit_multiplier(o.precision)} AS float)"
+        collector
+      end
+
+      def default_date_diff(o, collector)
+        collector << "extract(epoch from ("
+        collector = visit o.left, collector
+        collector << " - "
+        collector = visit o.right, collector
+        collector << ")) / CAST(#{second_unit_multiplier(o.precision)} AS float)"
+        collector
+      end
+
+      def second_unit_multiplier(unit)
+        case unit
+        when 'year'
+          366 * 24 * 60 * 60
+        when 'month'
+          31 * 24 * 60 * 60
+        when 'week'
+          7 * 24 * 60 * 60
+        when 'day'
+          24 * 60 * 60
+        when 'hour'
+          60 * 60
+        when 'minute'
+          60
+        when 'second'
+          1
+        end
+      end
+
       def visit_ArelExtensions_Nodes_Duration o, collector
         collector << "EXTRACT(#{Arel::Visitors::PostgreSQL::DATE_MAPPING[o.left]} FROM "
         collector = visit o.right, collector
