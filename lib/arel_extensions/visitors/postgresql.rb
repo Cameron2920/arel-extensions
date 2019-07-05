@@ -262,6 +262,7 @@ module ArelExtensions
         collector << " ) "
         collector << " ) "
         collector << " ) "
+        collector << " / CAST(#{second_unit_multiplier(o.precision)} AS float)"
         collector
       end
 
