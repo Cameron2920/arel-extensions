@@ -10,7 +10,7 @@ module ArelExtensions
 				case expr[1]
 				when 'boolean'
 					@return_type= :boolean
-				when 'bigint', 'int', 'smallint', 'tinyint', 'bit'
+				when 'bigint', 'int', 'smallint', 'tinyint', 'bit', 'integer'
 					@return_type= :int
 				when 'decimal', 'numeric', 'money', 'smallmoney', 'float', 'real'
 					@return_type= :decimal
