@@ -10,6 +10,31 @@ module ArelExtensions
       }
       Arel::Visitors::PostgreSQL::NUMBER_COMMA_MAPPING = { 'en_EN' => '.', 'fr_FR' => ',' }
 
+      def visit_ArelExtensions_Nodes_Cast o, collector
+        collector << "CAST("
+        collector = visit o.left, collector
+        collector << " AS "
+        case o.as_attr
+        when :string
+          as_attr = Arel::Nodes::SqlLiteral.new('char')
+        when :number
+          as_attr = Arel::Nodes::SqlLiteral.new('int')
+        when :decimal, :float
+          as_attr = Arel::Nodes::SqlLiteral.new('float')
+        when :datetime
+          as_attr = Arel::Nodes::SqlLiteral.new('timestamp')
+        when :time
+          as_attr = Arel::Nodes::SqlLiteral.new('time')
+        when :binary
+          as_attr = Arel::Nodes::SqlLiteral.new('binary')
+        else
+          as_attr = Arel::Nodes::SqlLiteral.new(o.as_attr.to_s)
+        end
+        collector = visit as_attr, collector
+        collector << ")"
+        collector
+      end
+
       def visit_ArelExtensions_Nodes_Rand o, collector
         collector << "RANDOM("
         if(o.left != nil && o.right != nil)
