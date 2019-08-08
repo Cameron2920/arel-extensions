@@ -390,7 +390,7 @@ module ArelExtensions
         collector << "CAST("
         collector = visit o.left, collector
         collector << " AS "
-        case o.as_attr
+        case o.as_attr.try(:to_sym)
         when :string
           as_attr = Arel::Nodes::SqlLiteral.new('varchar')
         when :time
