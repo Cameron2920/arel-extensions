@@ -398,7 +398,7 @@ module ArelExtensions
         when :number
           as_attr = Arel::Nodes::SqlLiteral.new('int')
         when :datetime
-          as_attr = Arel::Nodes::SqlLiteral.new('datetime')
+          as_attr = Arel::Nodes::SqlLiteral.new('timestamp')
         when :binary
           as_attr = Arel::Nodes::SqlLiteral.new('binary')
         else
