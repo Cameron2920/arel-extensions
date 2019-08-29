@@ -293,7 +293,7 @@ module ArelExtensions
         collector << "CAST("
         collector = visit o.left, collector
         collector << " AS "
-        case o.as_attr
+        case o.as_attr.try(:to_sym)
         when :string
           as_attr = Arel::Nodes::SqlLiteral.new('char')
         when :time
@@ -304,6 +304,8 @@ module ArelExtensions
           as_attr = Arel::Nodes::SqlLiteral.new('datetime')
         when :binary
           as_attr = Arel::Nodes::SqlLiteral.new('binary')
+        when :float
+          as_attr = Arel::Nodes::SqlLiteral.new('DECIMAL')
         else
           as_attr = Arel::Nodes::SqlLiteral.new(o.as_attr.to_s)
         end
