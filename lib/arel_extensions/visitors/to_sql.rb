@@ -1,7 +1,54 @@
 module ArelExtensions
   module Visitors
     Arel::Visitors::ToSql.class_eval do
+      WHERE    = ' WHERE '    # :nodoc:
+      SPACE    = ' '          # :nodoc:
+      COMMA    = ', '         # :nodoc:
+      GROUP_BY = ' GROUP BY ' # :nodoc:
+      ORDER_BY = ' ORDER BY ' # :nodoc:
+      WINDOW   = ' WINDOW '   # :nodoc:
+      AND      = ' AND '      # :nodoc:
+      DISTINCT = 'DISTINCT'   # :nodoc:
 
+      def visit_Arel_Nodes_SelectCore o, collector
+        collector << "SELECT"
+        collector = maybe_visit o.top, collector
+        collector = maybe_visit o.set_quantifier, collector
+        collect_nodes_for o.projections, collector, SPACE
+
+        if o.source && !o.source.empty?
+          collector << " FROM "
+          collector = visit o.source, collector
+        end
+        collect_nodes_for o.wheres, collector, WHERE, AND, true
+        collect_nodes_for o.groups, collector, GROUP_BY
+
+        unless o.havings.empty?
+          collector << " HAVING "
+          inject_join o.havings, collector, AND
+        end
+        collect_nodes_for o.windows, collector, WINDOW
+
+        collector
+      end
+
+      def collect_nodes_for nodes, collector, spacer, connector = COMMA, wrap_in_parentheses = false
+        unless nodes.empty?
+          collector << spacer
+          len = nodes.length - 1
+          nodes.each_with_index do |x, i|
+            if wrap_in_parentheses
+              collector << "("
+            end
+            collector = visit(x, collector)
+
+            if wrap_in_parentheses
+              collector << ")"
+            end
+            collector << connector unless len == i
+          end
+        end
+      end
 
       # Math Functions
       def visit_ArelExtensions_Nodes_Abs o, collector
