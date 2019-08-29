@@ -104,9 +104,9 @@ module ArelExtensions
       def visit_ArelExtensions_Nodes_Cast o, collector
         if o.as_attr.to_sym == :boolean
           if o.left.value
-            collector << "1 = 1"
+            collector << "1"
           else
-            collector << "1 != 1"
+            collector << "0"
           end
         else
           collector << "CAST("
