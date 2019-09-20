@@ -1,6 +1,30 @@
 module ArelExtensions
   module Visitors
     Arel::Visitors::SQLServer.class_eval do
+      def visit_Arel_Nodes_SelectStatement o, collector
+        is_root_select_statement = @is_root_select_statement
+        @is_root_select_statement = false
+        @select_statement = o
+        distinct_One_As_One_Is_So_Not_Fetch o
+
+        if o.with
+          collector = visit o.with, collector
+          collector << SPACE
+        end
+
+        collector = o.cores.inject(collector) { |c,x|
+          visit_Arel_Nodes_SelectCore(x, c)
+        }
+
+        if is_root_select_statement
+          collector = visit_Orders_And_Let_Fetch_Happen o, collector
+          collector = visit_Make_Fetch_Happen o, collector
+        end
+        collector
+      ensure
+        @select_statement = nil
+      end
+
       def visit_ArelExtensions_Nodes_StringToDate(o, collector)
         collector << "CAST("
         collector = visit Arel::Nodes::Quoted.new(o.left), collector
