@@ -120,11 +120,7 @@ module ArelExtensions
       def mssql_value(v = nil)
         v ||= self.expressions.last
         if defined?(ActiveSupport::Duration) && ActiveSupport::Duration === v
-          if @date_type == :date
-            v.inspect.to_i
-          elsif @date_type == :datetime
-            v.to_i
-          end
+          v.parts[v.parts.keys[0]]
         else
           v
         end
@@ -133,11 +129,7 @@ module ArelExtensions
       def mssql_datepart(v = nil)
         v ||= self.expressions.last
         if defined?(ActiveSupport::Duration) && ActiveSupport::Duration === v
-          if @date_type == :date
-            Arel.sql('day')
-          elsif @date_type == :datetime
-            Arel.sql('second')
-          end
+          Arel.sql(v.parts.keys[0].to_s.singularize)
         else
           v
         end
